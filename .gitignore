@@ -1,0 +1,11 @@
+*.Rhistory
+.Rdata
+*.Rproj
+inst/doc
+
+.Rproj.user
+*.Rproj
+.Rhistory
+.RData
+rais_cache/
+rais_data/
