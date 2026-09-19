@@ -96,9 +96,11 @@ rais_catalog <- function(years = NULL,
 # minimal FTP directory listing over the curl package (Windows-style lines:
 # "MM-DD-YY  HH:MM<AM/PM>  <DIR>|<size>  name with spaces")
 ftp_list_dir <- function(url) {
-  con <- curl::curl(paste0(sub("/$", "", url), "/"), "r")
+  con <- curl::curl(paste0(URLencode(sub("/$", "", url)), "/"), "r")
   on.exit(try(close(con), silent = TRUE), add = TRUE)
   lines <- readLines(con, warn = FALSE)
+  bad <- is.na(iconv(lines, "UTF-8", "UTF-8"))
+  if (any(bad)) lines[bad] <- iconv(lines[bad], "latin1", "UTF-8")
   m <- regmatches(lines, regexec("^\\S+\\s+\\S+\\s+(<DIR>|[0-9]+)\\s+(.*)$", lines))
   ok <- lengths(m) == 3
   if (!any(ok)) stop("listagem FTP vazia ou em formato nao reconhecido: ", url)

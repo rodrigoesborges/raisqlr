@@ -71,7 +71,11 @@ rais_build <- function(catalog, dir = "rais_cache", chunk.size = as.integer(1e6)
       rm(x); gc()
       start_n <- start_n + chunk.size
     }
-    file.rename(tf2, catalog$output_filename[i])
+    if (!suppressWarnings(file.rename(tf2, catalog$output_filename[i]))) {
+      if (!file.copy(tf2, catalog$output_filename[i], overwrite = TRUE))
+        stop("falha ao gravar ", catalog$output_filename[i])
+      unlink(tf2)
+    }
     unlink(td, recursive = TRUE)
     catalog$nlines[i] <- nlines
     message(basename(src[i]), " -> ", catalog$output_filename[i], " (", nlines, " linhas)")

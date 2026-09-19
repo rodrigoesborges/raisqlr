@@ -50,7 +50,7 @@ rais_download <- function(catalog, dir = "rais_data", workers = 1, quiet = TRUE)
 fetch_one <- function(url, dest, quiet) {
   tmp <- paste0(dest, ".part")
   ok <- tryCatch({
-    curl::curl_download(url, tmp, mode = "wb", quiet = quiet)
+    curl::curl_download(URLencode(url), tmp, mode = "wb", quiet = quiet)
     TRUE
   }, error = function(e) { message("FALHA ", url, ": ", conditionMessage(e)); FALSE })
   if (ok) ok <- file.rename(tmp, dest)
