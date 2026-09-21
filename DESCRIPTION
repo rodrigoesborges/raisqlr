@@ -1,14 +1,14 @@
 Package: raisqlr
 Title: Download dos microdados da RAIS e carga em banco de dados
-    PostgreSQL
-Version: 0.0.0.9000
-Authors@R: 
-    person("Rodrigo", "Borges", , "rodrigo.borges@ipea.gov.br", role = c("aut", "cre"))
+        PostgreSQL
+Version: 0.1.0
+Authors@R: person("Rodrigo", "Borges", , "rodrigo.borges@ipea.gov.br",
+        role = c("aut", "cre"))
 Description: Cataloga, baixa e converte os microdados da RAIS (Relacao
-    Anual de Informacoes Sociais, Ministerio do Trabalho e Emprego) e os
-    carrega em um banco PostgreSQL no esquema contratado
-    'rais_vinculo_YYYY'/'rais_estabelecimento_YYYY', consumido pelo AEDi e
-    pelo painel PNDR.
+        Anual de Informacoes Sociais, Ministerio do Trabalho e Emprego)
+        e os carrega em um banco PostgreSQL no esquema contratado
+        'rais_vinculo_YYYY'/'rais_estabelecimento_YYYY', consumido pelo
+        AEDi e pelo painel PNDR.
 License: MIT + file LICENSE
 URL: https://github.com/rodrigoesborges/raisqlr
 BugReports: https://github.com/rodrigoesborges/raisqlr/issues
@@ -16,13 +16,6 @@ Language: pt-BR
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-Imports: 
-    archive,
-    curl,
-    data.table,
-    DBI,
-    readxl,
-    RPostgres
-Suggests: 
-    testthat (>= 3.0.0)
+Imports: archive, curl, data.table, DBI, readxl, RPostgres
+Suggests: testthat (>= 3.0.0)
 Config/testthat/edition: 3
