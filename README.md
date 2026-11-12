@@ -39,6 +39,10 @@ nunca nomes.
   regexpr(NA)`): leituras internas passam por gunzip em temporário
   (`fread_safe()`; requer o binário `gunzip`).
 - **CBO inválido `'0000-1'`** (RAIS 2020): corrigido dentro do `rais_build()`.
+- **Placeholder `'0*-1'` nos arquivos IGNORADO** (1994-97, bucket de UF
+  ignorada do MTE): colunas numéricas como `municipio` vêm todas como
+  `"0000-1"`; `rais_build()` as esvazia para NA e `rais_pg_load()` tipa
+  coluna toda-NA como `double precision` (não `text`).
 - **Carga idempotente e transacional:** cada tabela é DROP+CREATE+COPY numa
   transação única (rollback em erro) — sem o `append=TRUE` cego do pipeline
   antigo, que duplicava anos ao catalogar `2024` e `2024 Parcial` juntos.
@@ -59,8 +63,9 @@ nunca nomes.
 
 ## Status
 
-0.2.0 — eras empíricas mapeadas do FTP (1985-2025): contrato estendido até
-**1994** (mesma era `cnae95-cbo94`, sem remuneração nominal até 1998);
-`rais_create_indexes()` era-aware. Banco local `mte_rais` com
-`rais_vinculo/estabelecimento_1998..2025` (sem 2003). Testes: 52/52
-(incl. asserts de era para 1994/1998/1999).
+0.2.1 — fix do placeholder `'0*-1'` dos arquivos IGNORADO (1994-97):
+`municipio` deixava de virar `text` no PostgreSQL. 0.2.0 — eras empíricas
+mapeadas do FTP (1985-2025): contrato estendido até **1994** (mesma era
+`cnae95-cbo94`, sem remuneração nominal até 1998); `rais_create_indexes()`
+era-aware. Banco local `mte_rais` com `rais_vinculo/estabelecimento_1994..2025`
+(sem 2003; 1994-1998 sem remuneração nominal). Testes: 89/89.

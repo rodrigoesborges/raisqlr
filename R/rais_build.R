@@ -4,9 +4,12 @@
 #' ISO-8859-1; novo, desde a RAIS 2024 definitiva: `sep=","`, `dec="."`,
 #' cabecalhos `"X - Codigo"`, arquivos internos `*.COMT`), normaliza os nomes
 #' de colunas para o contrato congelado consumido pelo AEDi
-#' (`rais_vinculo_YYYY`/`rais_estabelecimento_YYYY`), aplica `-1 -> NA` e a
-#' correcao historica de CBO (`'0000-1' -> '00001'`, RAIS 2020), e grava o
-#' cache em CSV gzip `sep=";"`/`dec="."` pronto para [rais_pg_load()].
+#' (`rais_vinculo_YYYY`/`rais_estabelecimento_YYYY`), aplica `-1 -> NA`, o
+#' esvaziamento do placeholder `'0*-1'` (UF ignorada dos arquivos IGNORADO
+#' da RAIS 1994-97, ex. municipio `"0000-1"`) e a correcao historica de CBO
+#' (`'0000-1' -> '00001'`, RAIS 2020); colunas totalmente vazias ficam
+#' numericas. Grava o cache em CSV gzip `sep=";"`/`dec="."` pronto para
+#' [rais_pg_load()].
 #'
 #' @param catalog catalogo com coluna `local_file` (saida de [rais_download()];
 #'   sem ela, `full_path` precisa apontar para arquivo local).
@@ -62,8 +65,13 @@ rais_build <- function(catalog, dir = "rais_cache", chunk.size = as.integer(1e6)
         if (is.character(x[[j]]) && j != "tipo_estab_1") {
           if (j == "cbo_ocupacao_2002")
             data.table::set(x, j = j, value = gsub("0000-1", "00001", x[[j]]))
+          # RAIS 1994-97: arquivos IGNORADO trazem placeholder fixo "0000-1"
+          # em colunas numericas (ex. municipio) - vira NA, nunca texto
+          ph <- grep("^0*-1$", x[[j]])
+          if (length(ph)) data.table::set(x, i = ph, j = j, value = NA)
           v <- suppressWarnings(as.numeric(trimws(x[[j]])))
-          if (any(!is.na(v))) data.table::set(x, j = j, value = v)
+          if (any(!is.na(v)) || all(is.na(x[[j]])))
+            data.table::set(x, j = j, value = v)
         }
       }
       data.table::fwrite(x, tf2, append = TRUE, sep = ";", dec = ".",

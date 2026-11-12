@@ -36,7 +36,8 @@ catalogo de entrada (invisivel).
 Cria (ou substitui) as tabelas \verb{rais_vinculo_<ano>}/\verb{rais_estabelecimento_<ano>}
 no PostgreSQL e as popula por blocos via COPY. A estrutura da tabela e
 harmonizada entre os arquivos do mesmo ano (uniao das colunas; coluna e
-texto se algum arquivo a tipa como texto, numerica caso contrario).
+texto somente se algum arquivo a tipa como texto, numerica caso
+contrario - inclusive colunas totalmente vazias).
 Cada tabela e escrita numa unica transacao (ROLLBACK automatico em erro).
 }
 \details{

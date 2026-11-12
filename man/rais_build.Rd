@@ -30,7 +30,10 @@ Extrai os \verb{.7z}, detecta o dialeto (legado: \code{sep=";"}, \code{dec=","},
 ISO-8859-1; novo, desde a RAIS 2024 definitiva: \code{sep=","}, \code{dec="."},
 cabecalhos \code{"X - Codigo"}, arquivos internos \verb{*.COMT}), normaliza os nomes
 de colunas para o contrato congelado consumido pelo AEDi
-(\code{rais_vinculo_YYYY}/\code{rais_estabelecimento_YYYY}), aplica \code{-1 -> NA} e a
-correcao historica de CBO (\code{'0000-1' -> '00001'}, RAIS 2020), e grava o
-cache em CSV gzip \code{sep=";"}/\code{dec="."} pronto para \code{\link[=rais_pg_load]{rais_pg_load()}}.
+(\code{rais_vinculo_YYYY}/\code{rais_estabelecimento_YYYY}), aplica \code{-1 -> NA}, o
+esvaziamento do placeholder \code{'0*-1'} (UF ignorada dos arquivos IGNORADO
+da RAIS 1994-97, ex. municipio \code{"0000-1"}) e a correcao historica de CBO
+(\code{'0000-1' -> '00001'}, RAIS 2020); colunas totalmente vazias ficam
+numericas. Grava o cache em CSV gzip \code{sep=";"}/\code{dec="."} pronto para
+\code{\link[=rais_pg_load]{rais_pg_load()}}.
 }

@@ -3,7 +3,8 @@
 #' Cria (ou substitui) as tabelas `rais_vinculo_<ano>`/`rais_estabelecimento_<ano>`
 #' no PostgreSQL e as popula por blocos via COPY. A estrutura da tabela e
 #' harmonizada entre os arquivos do mesmo ano (uniao das colunas; coluna e
-#' texto se algum arquivo a tipa como texto, numerica caso contrario).
+#' texto somente se algum arquivo a tipa como texto, numerica caso
+#' contrario - inclusive colunas totalmente vazias).
 #' Cada tabela e escrita numa unica transacao (ROLLBACK automatico em erro).
 #'
 #' @details Contrato congelado (consumido por `AEDi/R/upload_raispsql.R`):
@@ -50,13 +51,16 @@ rais_pg_load <- function(catalog, replace = TRUE,
     # are ALWAYS double precision at load time (a 1-row sample cannot
     # reliably distinguish integer/double - COPY aborts on "1.0000000" into
     # integer); rais_narrow_types() narrows afterwards with a full scan.
+    # logical = coluna toda-NA na amostra (ex. municipio so com placeholder
+    # '0*-1' ja esvaziado pelo build): entra como double precision, nunca
+    # text (NA de logical vira NULL no INSERT).
     structs <- lapply(tbl$output_filename, function(f) {
       x <- fread_safe(f, sep = ";", dec = ".", nrows = 1)
       data.frame(column = names(x), class = vapply(x, function(z) class(z)[1], ""))
     })
     all_cols <- unique(do.call(rbind, structs))
     fmt <- tapply(all_cols$class, all_cols$column, function(k)
-      if (any(k %in% c("character", "Date", "logical"))) "text" else "double precision")
+      if (any(k %in% c("character", "Date"))) "text" else "double precision")
     cols <- structs[[1]]$column  # preserves first file's order
     cols <- cols[cols %in% names(fmt)]
     extra <- setdiff(names(fmt), cols)
