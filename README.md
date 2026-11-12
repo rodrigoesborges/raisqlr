@@ -46,6 +46,12 @@ nunca nomes.
   não distinguem integer/double com segurança no COPY); `rais_narrow_types()`
   varre a tabela inteira e converte para `smallint`/`integer` (no banco local:
   620 GB → 325 GB).
+- **Eras de leiaute (`rais_era()`):** o contrato legado começa em **1994**
+  (CNAE 1.0/`cnae_95_classe` + CBO-94); 1985-1993 usam `ibge_subatividade`
+  e ficam fora. Anos antigos têm colunas a menos (vínculo 1994-95 = 28 col,
+  1996-98 = 31 — **sem `vl_remun_*_nom`, remuneração só em SM**; 1999 = 34,
+  igual 2000). `rais_create_indexes()` é era-aware: pula com `message()` os
+  índices cujas colunas não existem na tabela (ex.: sem `cnae_2_0_classe`).
 - **Preliminares:** desde a RAIS 2025 o MTE publica o release preliminar na
   pasta `"<ano>"` (sem sufixo) — `situacao` no catálogo reflete o sufixo da
   pasta; confira o Comunicado. Preliminares cobrem só o setor privado
@@ -53,6 +59,8 @@ nunca nomes.
 
 ## Status
 
-0.0.0.9000 — esqueleto funcional: catálogo (FTP/local), download paralelo,
-conversão de dialeto, carga PostgreSQL, índices, narrowing e layouts.
-Testes com fixture real (arquivo NI) e ciclo completo contra banco local.
+0.2.0 — eras empíricas mapeadas do FTP (1985-2025): contrato estendido até
+**1994** (mesma era `cnae95-cbo94`, sem remuneração nominal até 1998);
+`rais_create_indexes()` era-aware. Banco local `mte_rais` com
+`rais_vinculo/estabelecimento_1998..2025` (sem 2003). Testes: 52/52
+(incl. asserts de era para 1994/1998/1999).

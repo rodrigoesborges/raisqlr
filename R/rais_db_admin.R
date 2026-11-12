@@ -5,7 +5,9 @@
 #' `(vinculo_ativo_31_12, municipio)` e compostos com `cnae_2_0_classe`,
 #' `escolaridade_apos_2005`, `trunc(cbo_ocupacao_2002/1000)` e
 #' `trunc(cbo_ocupacao_2002)`; nos estabelecimentos, `(municipio)` e
-#' `(municipio, cnae_2_0_classe)`.
+#' `(municipio, cnae_2_0_classe)`. Indices cujas colunas nao existem na
+#' tabela do ano (eras 1994-2003 sem `cnae_2_0_classe`/`cbo_ocupacao_2002`
+#' ou sem `escolaridade_apos_2005`) sao pulados com mensagem, sem erro.
 #'
 #' @param years anos; default: todos os `rais_vinculo_<ano>` existentes.
 #' @param concurrently usar CREATE INDEX CONCURRENTLY (default FALSE; exige
@@ -32,17 +34,45 @@ rais_create_indexes <- function(years = NULL, concurrently = FALSE,
   }
   ci <- if (concurrently) "CREATE INDEX CONCURRENTLY IF NOT EXISTS" else "CREATE INDEX IF NOT EXISTS"
   for (y in years) {
-    q <- c(
-      sprintf("%s idx_rais_vinculo_%d_municipio ON rais_vinculo_%d (vinculo_ativo_31_12, municipio)", ci, y, y),
-      sprintf("%s idx_rais_vinculo_%d_municipio_cnae ON rais_vinculo_%d (vinculo_ativo_31_12, municipio, cnae_2_0_classe)", ci, y, y),
-      sprintf("%s idx_rais_vinculo_%d_municipio_escolaridade ON rais_vinculo_%d (vinculo_ativo_31_12, municipio, escolaridade_apos_2005)", ci, y, y),
-      sprintf("%s idx_rais_vinculo_%d_municipio_cbo ON rais_vinculo_%d (vinculo_ativo_31_12, municipio, trunc(cbo_ocupacao_2002/1000))", ci, y, y),
-      sprintf("%s idx_rais_vinculo_%d_municipio_cbog ON rais_vinculo_%d (vinculo_ativo_31_12, municipio, trunc(cbo_ocupacao_2002))", ci, y, y),
-      sprintf("%s idx_rais_estabelecimento_%d_municipio ON rais_estabelecimento_%d (municipio)", ci, y, y),
-      sprintf("%s idx_rais_estabelecimento_%d_municipio_cnae ON rais_estabelecimento_%d (municipio, cnae_2_0_classe)", ci, y, y))
-    for (stmt in q) DBI::dbExecute(db, stmt)
-    DBI::dbExecute(db, sprintf("ANALYZE rais_vinculo_%d", y))
-    DBI::dbExecute(db, sprintf("ANALYZE rais_estabelecimento_%d", y))
+    cols_da <- function(t) DBI::dbGetQuery(db, sprintf(
+      "SELECT column_name FROM information_schema.columns WHERE table_name = '%s'",
+      t))$column_name
+    v_cols <- tryCatch(cols_da(sprintf("rais_vinculo_%d", y)), error = function(e) character(0))
+    e_cols <- tryCatch(cols_da(sprintf("rais_estabelecimento_%d", y)), error = function(e) character(0))
+    tem <- function(cols, precisa) all(precisa %in% cols)
+    defs <- list(
+      list(tab = "rais_vinculo_%d", ix = "idx_rais_vinculo_%d_municipio",
+           precisa = c("vinculo_ativo_31_12", "municipio"),
+           expr = "(vinculo_ativo_31_12, municipio)"),
+      list(tab = "rais_vinculo_%d", ix = "idx_rais_vinculo_%d_municipio_cnae",
+           precisa = c("vinculo_ativo_31_12", "municipio", "cnae_2_0_classe"),
+           expr = "(vinculo_ativo_31_12, municipio, cnae_2_0_classe)"),
+      list(tab = "rais_vinculo_%d", ix = "idx_rais_vinculo_%d_municipio_escolaridade",
+           precisa = c("vinculo_ativo_31_12", "municipio", "escolaridade_apos_2005"),
+           expr = "(vinculo_ativo_31_12, municipio, escolaridade_apos_2005)"),
+      list(tab = "rais_vinculo_%d", ix = "idx_rais_vinculo_%d_municipio_cbo",
+           precisa = c("vinculo_ativo_31_12", "municipio", "cbo_ocupacao_2002"),
+           expr = "(vinculo_ativo_31_12, municipio, trunc(cbo_ocupacao_2002/1000))"),
+      list(tab = "rais_vinculo_%d", ix = "idx_rais_vinculo_%d_municipio_cbog",
+           precisa = c("vinculo_ativo_31_12", "municipio", "cbo_ocupacao_2002"),
+           expr = "(vinculo_ativo_31_12, municipio, trunc(cbo_ocupacao_2002))"),
+      list(tab = "rais_estabelecimento_%d", ix = "idx_rais_estabelecimento_%d_municipio",
+           precisa = c("municipio"), expr = "(municipio)"),
+      list(tab = "rais_estabelecimento_%d", ix = "idx_rais_estabelecimento_%d_municipio_cnae",
+           precisa = c("municipio", "cnae_2_0_classe"),
+           expr = "(municipio, cnae_2_0_classe)"))
+    for (d in defs) {
+      tab <- sprintf(d$tab, y)
+      cols_d <- if (grepl("^rais_vinculo", tab)) v_cols else e_cols
+      if (!length(cols_d) || !tem(cols_d, d$precisa)) {
+        message(tab, ": indice ", sprintf(d$ix, y),
+                " pulado (colunas ausentes: ", paste(setdiff(d$precisa, cols_d), collapse = ", "), ")")
+        next
+      }
+      DBI::dbExecute(db, sprintf("%s %s ON %s %s", ci, sprintf(d$ix, y), tab, d$expr))
+    }
+    if (length(v_cols)) DBI::dbExecute(db, sprintf("ANALYZE rais_vinculo_%d", y))
+    if (length(e_cols)) DBI::dbExecute(db, sprintf("ANALYZE rais_estabelecimento_%d", y))
   }
   invisible(years)
 }

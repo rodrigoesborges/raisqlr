@@ -2,14 +2,25 @@
 #
 # Contrato do banco carregado pelo raisqlr: os nomes de coluna variam com a
 # epoca dos microdados. Eras verificadas por introspecao do mte_rais
-# (2026-09-21; nao existe tabela 2003 - carga incompleta no FTP).
+# (2026-09-21; nao existe tabela 2003 - carga incompleta no FTP) e, para os
+# anos 1994-1999, pelos headers dos microdados oficiais (FTP MTE, 2026-10-15:
+# RR<ano>.7z para vinculos de cada ano e ESTB<ano>.7z para estabelecimentos).
 #
-# vinculo:        2000-2003  cnae_95_classe (5d) + cbo_94_ocupacao (4-5d)
+# vinculo:        1994-2003  cnae_95_classe (5d) + cbo_94_ocupacao (4-5d);
+#                            1994-1995 sem bairros_fortaleza/bairros_rj/
+#                            regioes_adm_df (28 col); 1996-1998 com elas (31);
+#                            1994-1998 SEM vl_remun_*_nom (remuneracao so
+#                            em multiplos de SM); 1999 em diante completa (34)
 #                 2004-2005  cnae_95_classe + cbo_ocupacao_2002 (a coluna
 #                            cnae_2_0_classe existe, mas veio zerada na carga)
 #                 2006-      cnae_2_0_classe (5d, inclusive 2024-2025);
 #                            cbo_ocupacao_2002 (5-6d)
-# estabelecimento 2000-2001  clas_cnae_95 + tamestab
+# estabelecimento 1994-2001  clas_cnae_95 + tamestab (variantes por ano:
+#                            1994 11 col com nat_estb/tipo_estb/subativ_ibge;
+#                            1995 11; 1996 14; 1997 12 sem bairr_sp/distrito_sp;
+#                            1998 14; 1999 17 sem ind_pat; 2000-2001 18);
+#                            1993 e anteriores usam subativ_ibge (sem
+#                            clas_cnae_95) - fora do contrato
 #                 2002-2005  cnae_95_classe + tamanho_estabelecimento
 #                 2006-2023  + cnae_2_0_classe (5d)
 #                 2024-      cnae_2_0_classe com DV (7d)
@@ -23,10 +34,12 @@
 #
 # colunas estaveis em todas as eras (nao listadas no dicionario):
 # municipio, vinculo_ativo_31_12, vl_remun_dezembro_nom, vl_remun_media_nom.
+# EXCECAO verificada em 2026-10-15: vinculos 1994-1998 NAO trazem
+# vl_remun_*_nom (apenas vl_remun_*__sm_).
 
 .rais_eras <- data.frame(
   tabela = c(rep("vinculo", 3), rep("estabelecimento", 4)),
-  ano_min = c(2000L, 2004L, 2006L, 2000L, 2002L, 2006L, 2024L),
+  ano_min = c(1994L, 2004L, 2006L, 1994L, 2002L, 2006L, 2024L),
   ano_max = c(2003L, 2005L, 2999L, 2001L, 2005L, 2023L, 2999L),
   era = c("cnae95-cbo94", "cnae95-cbo02", "cnae20-cbo02",
           "cnae95-clas-tamestab", "cnae95", "cnae20", "cnae20-dv"),
@@ -46,7 +59,9 @@
 #'
 #' Identifica a era (padrao de nomes de coluna) de `rais_vinculo_YYYY` ou
 #' `rais_estabelecimento_YYYY` no banco carregado pelo raisqlr. A tabela 2003
-#' nao existe (carga incompleta no FTP).
+#' nao existe (carga incompleta no FTP). O contrato comeca em 1994 (primeiro
+#' ano com CNAE 1.0/CBO 94 nos microdados); anos 1985-1993 seguem leiaute
+#' distinto (ibge_subatividade/subativ_ibge, sem CNAE 95) e estao fora.
 #'
 #' @param ano ano de referencia (a tabela `_<ano>`).
 #' @param tabela `"vinculo"` ou `"estabelecimento"`.

@@ -1,5 +1,8 @@
-test_that("eras do vinculo: cbo94 2000-2003, cnae 2.0 de 2006", {
-  expect_error(rais_era(1999, "vinculo"), "contrato")
+test_that("eras do vinculo: cbo94 1994-2003, cnae 2.0 de 2006", {
+  expect_error(rais_era(1993, "vinculo"), "contrato")
+  expect_identical(rais_era(1994, "vinculo"), "cnae95-cbo94")
+  expect_identical(rais_era(1998, "vinculo"), "cnae95-cbo94")
+  expect_identical(rais_era(1999, "vinculo"), "cnae95-cbo94")
   expect_identical(rais_era(2000, "vinculo"), "cnae95-cbo94")
   expect_identical(rais_era(2002, "vinculo"), "cnae95-cbo94")
   expect_identical(rais_era(2003, "vinculo"), "cnae95-cbo94")
@@ -11,7 +14,11 @@ test_that("eras do vinculo: cbo94 2000-2003, cnae 2.0 de 2006", {
   expect_identical(rais_era(2025, "vinculo"), "cnae20-cbo02")
 })
 
-test_that("eras do estabelecimento: tres trocas de padrao", {
+test_that("eras do estabelecimento: trocas de padrao; piso 1994", {
+  expect_error(rais_era(1993, "estabelecimento"), "contrato")
+  expect_identical(rais_era(1994, "estabelecimento"), "cnae95-clas-tamestab")
+  expect_identical(rais_era(1998, "estabelecimento"), "cnae95-clas-tamestab")
+  expect_identical(rais_era(1999, "estabelecimento"), "cnae95-clas-tamestab")
   expect_identical(rais_era(2000, "estabelecimento"), "cnae95-clas-tamestab")
   expect_identical(rais_era(2001, "estabelecimento"), "cnae95-clas-tamestab")
   expect_identical(rais_era(2002, "estabelecimento"), "cnae95")
@@ -22,6 +29,11 @@ test_that("eras do estabelecimento: tres trocas de padrao", {
 })
 
 test_that("rais_coluna resolve colunas por conceito/ano", {
+  expect_identical(rais_coluna(1998, "vinculo", "cnae_95"), "cnae_95_classe")
+  expect_identical(rais_coluna(1998, "vinculo", "cbo_94"), "cbo_94_ocupacao")
+  expect_identical(rais_coluna(1994, "vinculo", "cbo_2002"), NA_character_)
+  expect_identical(rais_coluna(1999, "estabelecimento", "porte"), "tamestab")
+  expect_identical(rais_coluna(1994, "estabelecimento", "cnae_95"), "clas_cnae_95")
   expect_identical(rais_coluna(2001, "vinculo", "cnae_2_0"), NA_character_)
   expect_identical(rais_coluna(2001, "vinculo", "cnae_95"), "cnae_95_classe")
   expect_identical(rais_coluna(2001, "vinculo", "cbo_94"), "cbo_94_ocupacao")

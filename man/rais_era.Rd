@@ -17,5 +17,7 @@ string com o rotulo da era (ver \code{R/eras.R}).
 \description{
 Identifica a era (padrao de nomes de coluna) de \code{rais_vinculo_YYYY} ou
 \code{rais_estabelecimento_YYYY} no banco carregado pelo raisqlr. A tabela 2003
-nao existe (carga incompleta no FTP).
+nao existe (carga incompleta no FTP). O contrato comeca em 1994 (primeiro
+ano com CNAE 1.0/CBO 94 nos microdados); anos 1985-1993 seguem leiaute
+distinto (ibge_subatividade/subativ_ibge, sem CNAE 95) e estao fora.
 }

@@ -30,5 +30,7 @@ as queries de indicadores do AEDi/PNDR): nos vinculos,
 \verb{(vinculo_ativo_31_12, municipio)} e compostos com \code{cnae_2_0_classe},
 \code{escolaridade_apos_2005}, \code{trunc(cbo_ocupacao_2002/1000)} e
 \code{trunc(cbo_ocupacao_2002)}; nos estabelecimentos, \code{(municipio)} e
-\verb{(municipio, cnae_2_0_classe)}.
+\verb{(municipio, cnae_2_0_classe)}. Indices cujas colunas nao existem na
+tabela do ano (eras 1994-2003 sem \code{cnae_2_0_classe}/\code{cbo_ocupacao_2002}
+ou sem \code{escolaridade_apos_2005}) sao pulados com mensagem, sem erro.
 }

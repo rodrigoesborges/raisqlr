@@ -1,7 +1,7 @@
 Package: raisqlr
 Title: Download dos microdados da RAIS e carga em banco de dados
         PostgreSQL
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: person("Rodrigo", "Borges", , "rodrigo.borges@ipea.gov.br",
         role = c("aut", "cre"))
 Description: Cataloga, baixa e converte os microdados da RAIS (Relacao
